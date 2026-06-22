@@ -10,24 +10,23 @@ router.post("/signup", async (req, res, next) => {
   const { email, password, name } = req.body
 
   if (!email || !password) {
-    res
-      .status(400)
-      .json({ errormessage: "Please enter both email and password" })
+    res.status(400).json({ message: "Please enter both email and password" })
     return
   }
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm
   if (passwordRegex.test(password) === false) {
     res.status(400).json({
-      errormessage:
+      message:
         "Please enter a stronger password. It must contain upper and lower case letters and have at least 8 characters of length",
     })
+    return
   }
   try {
     const foundUser = await User.findOne({ email: email })
     if (foundUser) {
       res
         .status(400)
-        .json({ errormessage: "Sorry, a user has already used that email." })
+        .json({ message: "Sorry, a user has already used that email." })
       return
     }
 
@@ -40,7 +39,7 @@ router.post("/signup", async (req, res, next) => {
     }
 
     await User.create(newUser)
-    res.status(201).send("user created")
+    res.status(201).json({ message: "user created" })
   } catch (error) {
     next(error)
   }
@@ -50,9 +49,7 @@ router.post("/signup", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body
   if (!email || !password) {
-    res
-      .status(400)
-      .json({ errormessage: "Please enter both email and password" })
+    res.status(400).json({ message: "Please enter both email and password" })
     return
   }
 
@@ -62,13 +59,13 @@ router.post("/login", async (req, res, next) => {
     if (!foundUser) {
       res
         .status(400)
-        .json({ errormessage: "No user has signed up with this email." })
+        .json({ message: "No user has signed up with this email." })
       return
     }
     // check if password matches
     const checkPassword = await bcrypt.compare(password, foundUser.password)
     if (!checkPassword) {
-      res.status(400).json({ errormessage: "Password Incorrect" })
+      res.status(400).json({ message: "Password Incorrect" })
       return
     }
 

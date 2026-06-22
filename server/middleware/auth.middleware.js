@@ -11,7 +11,7 @@ function verifyToken(req, res, next) {
     
     next()
   } catch (error) {
-    res.status(401).json({ ErrorMessage: "Token is invalid" })
+    res.status(401).json({ message: "Token is invalid" })
   }
   console.log(req.headers)
 }

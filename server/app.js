@@ -23,7 +23,10 @@ app.get("/docs", (req, res) => {
 
 // API ROUTES
 const router = require("./routes/index.routes")
-app.use("/api",router)
+app.use("/",router)
+
+// USER ROUTES
+
 
 // MIDDLEWARES HANDLING ERROR
 const {errorHandler, notFoundHandler} = require("./middleware/error-handling.js")
