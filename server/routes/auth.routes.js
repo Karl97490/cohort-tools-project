@@ -13,6 +13,14 @@ router.post("/signup", async (req, res, next) => {
     res.status(400).json({ message: "Please enter both email and password" })
     return
   }
+
+  const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/gm
+
+  if (emailRegex.test(email) === false) {
+    res.status(400).json({ message: "please enter a real email" })
+    return
+  }
+
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm
   if (passwordRegex.test(password) === false) {
     res.status(400).json({
@@ -52,6 +60,12 @@ router.post("/login", async (req, res, next) => {
     res.status(400).json({ message: "Please enter both email and password" })
     return
   }
+  
+  const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/gm
+  if (emailRegex.test(email) === false) {
+    res.status(400).json({ message: "please enter a real email" })
+    return
+  }
 
   try {
     // check if email exists
@@ -62,6 +76,8 @@ router.post("/login", async (req, res, next) => {
         .json({ message: "No user has signed up with this email." })
       return
     }
+
+
     // check if password matches
     const checkPassword = await bcrypt.compare(password, foundUser.password)
     if (!checkPassword) {
