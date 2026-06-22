@@ -3,6 +3,7 @@ const router = express.Router()
 
 // IMPORT MODEL
 const Student = require("../models/Students.model")
+const Cohort = require("../models/Cohorts.model")
 
 router.get("/", async (req, res, next) => {
   // returns all students.
@@ -20,6 +21,16 @@ router.get("/cohort/:cohortId", async (req, res, next) => {
     const response = await Student.find({
       cohort: req.params.cohortId, // Find students whose cohort field matches the cohortId.
     }).populate("cohort")
+
+    // if statement to differentiate between an invalid cohort id, and a cohort with no students
+    if (!response.length) {
+      const response = await Cohort.findById(req.params.cohortId)
+      if (!response) {
+        res.status(400).json({ message: "Cohort not found. " })
+        return
+      }
+    }
+
     res.json(response)
   } catch (error) {
     next(error)
@@ -32,6 +43,12 @@ router.get("/:studentId", async (req, res, next) => {
     const response = await Student.findById(req.params.studentId).populate(
       "cohort",
     )
+
+    if (!response) {
+      res.status(400).json({ message: "Students not found. " })
+      return
+    }
+
     res.json(response)
   } catch (error) {
     next(error)
@@ -53,6 +70,14 @@ router.post("/", async (req, res, next) => {
     cohort,
     projects,
   } = req.body
+
+  if (!firstName || !lastName || !email || !phone) {
+    res
+      .status(400)
+      .json({ message: "First, last name, email and phone are required." })
+    return
+  }
+
   try {
     const newStudent = {
       firstName,
@@ -89,6 +114,14 @@ router.put("/:studentId", async (req, res, next) => {
     cohort,
     projects,
   } = req.body
+
+  if (!firstName || !lastName || !email || !phone) {
+    res
+      .status(400)
+      .json({ message: "First, last name, email and phone are required." })
+    return
+  }
+
   try {
     const updatedStudent = {
       firstName,
@@ -103,12 +136,23 @@ router.put("/:studentId", async (req, res, next) => {
       cohort,
       projects,
     }
-    console.log(updatedStudent)
+
+    if (Object.values(updatedStudent).includes(undefined)) {
+      res.status(400).json({ message: "Missing information." })
+      return
+    }
+
     const response = await Student.findByIdAndUpdate(
       req.params.studentId,
       updatedStudent,
       { returnDocument: "after", runValidators: true },
     )
+
+    if (!response) {
+      res.status(400).json({ message: "Students not found. " })
+      return
+    }
+
     res.json(response)
   } catch (error) {
     next(error)
@@ -118,7 +162,13 @@ router.put("/:studentId", async (req, res, next) => {
 router.delete("/:studentId", async (req, res, next) => {
   // Deletes a student from the database.
   try {
-    await Student.findByIdAndDelete(req.params.studentId)
+    const response = await Student.findByIdAndDelete(req.params.studentId)
+
+    if (!response) {
+      res.status(400).json({ message: "Students not found. " })
+      return
+    }
+
     res.json({ message: "Deleted successfully" })
   } catch (error) {
     next(error)
